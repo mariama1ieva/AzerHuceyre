@@ -1,0 +1,77 @@
+document.addEventListener('DOMContentLoaded', function () {
+    (function () {
+        const autoplayDuration = 8000; // must to set the same value in style.scss for transition for .progress-bar class
+        const sliderHolderSwiper = document.querySelectorAll('[data-id="main-slider"]');
+
+        const sliderConfigSwiper = {
+            slidesPerView: 1,
+            effect: 'fade',
+            loop: true,
+            fadeEffect: { crossFade: true },
+            autoplay: {
+              delay: autoplayDuration,
+              disableOnInteraction: false,
+            },
+            pagination: {
+                el: ".intro-slider-nav",
+                clickable: true,
+                renderBullet: function (index, className) {
+                    const paginationTemplate = document.getElementById('slider-pagination-template');
+                    const paginationItem = paginationTemplate.querySelector(`[data-slide="${index}"]`);
+                    if (paginationItem){
+                        const clonedItem = paginationItem.cloneNode(true);
+                        clonedItem.classList.add(className);
+                        return clonedItem.outerHTML;
+                    }
+                    // if template doesn't contain proper pagination item then return default item
+                    return `
+                        <div class="intro-slider-nav__item ${className}">
+                            <div class="intro-slider-nav__text">
+                                <div class="intro-slider-nav__icon">
+                                    <i class="icon-phone-2"></i>
+                                </div>
+                                <div class="intro-slider-nav__desc">
+                                    <span>Title</span>
+                                    <p>description</p>
+                                </div>
+                            </div>
+                            <div class="intro-slider-nav__progress">
+                                <div data-id="progress-bar" class="progress-bar"></div>
+                            </div>
+                        </div>
+                    `;
+                },
+            },
+            on: {
+                init: function (slider) {
+                    const bullets = slider.pagination.bullets;
+                    bullets.forEach((bullet) => {
+
+                        if (bullet.classList.contains('swiper-pagination-bullet-active')) {
+                            bullet.classList.remove('swiper-pagination-bullet-active');
+                            setTimeout(() => {
+                                bullet.classList.add('swiper-pagination-bullet-active');
+                            }, 100);
+                        }
+                    })
+                },
+                slideChange: function (slider) {
+                    const activeSlide = slider.slides[slider.activeIndex];
+                    if (activeSlide.dataset.ecommercePromotion) {
+                        if (isVisibleInViewport(activeSlide)) {
+                            ecommerceViewPromotion(
+                                activeSlide.dataset.ecommerceCreativeName,
+                                activeSlide.dataset.ecommerceCreativeSlot,
+                                activeSlide.dataset.ecommerceName
+                            );
+                        }
+                    }
+                }
+            }
+          };
+
+        Array.from(sliderHolderSwiper).forEach((item) => {
+            new Swiper(item, sliderConfigSwiper);
+        });
+    })();
+});
